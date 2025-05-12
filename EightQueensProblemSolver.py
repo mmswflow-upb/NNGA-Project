@@ -15,7 +15,7 @@ VISUALIZATION_UPDATE_INTERVAL = 0.05
 # --- Helper Functions ---
 def calculate_fitness(chromosome):
     """
-    Fitness = number of non-attacking pairs of queens.
+    Fitness = number of non-attacking pairs of queens. 
     Maximum possible = N*(N-1)/2 (28 for N=8).
     We count diagonal conflicts and subtract from max.
     """
@@ -101,13 +101,28 @@ def setup_visualization():
 
 def draw_empty_board():
     """
-    Draw an NxN checkerboard background.
+    Draw an NxN checkerboard background with chess coordinates.
     """
+    # 1) Checker pattern as before
     pattern = np.fromfunction(lambda i, j: (i + j) % 2, (N, N))
     ax.imshow(pattern, cmap='binary', interpolation='nearest')
-    ax.set_xticks(np.arange(N)); ax.set_yticks(np.arange(N))
-    ax.set_xticklabels([]); ax.set_yticklabels([])
-    ax.grid(True, which='both', color='black')
+
+    # 2) Major ticks at every square
+    ax.set_xticks(np.arange(N))
+    ax.set_yticks(np.arange(N))
+
+    # 3) Label files a–h along the x-axis
+    files = [chr(ord('a') + i) for i in range(N)]
+    ax.set_xticklabels(files)
+    ax.xaxis.set_ticks_position('top')      # move labels to the top edge
+
+    # 4) Label ranks 1–N along the y-axis, with "1" at the bottom
+    ranks = [str(i + 1) for i in range(N)]
+    ax.set_yticklabels(ranks[::-1])         # reverse so '1' is at bottom
+    ax.invert_yaxis()                       # makes row-0 plot at the top
+
+    # 5) Draw grid lines on the minor grid (the square boundaries)
+    ax.grid(True, which='minor', color='black')
 
 
 def animate_placement(chromosome, generation, fitness_score, max_score):
@@ -131,10 +146,7 @@ def animate_placement(chromosome, generation, fitness_score, max_score):
     time.sleep(VISUALIZATION_UPDATE_INTERVAL)
 
 
-def close_visualization():
-    """Turn off interactive mode and close plot window."""
-    if fig and plt.fignum_exists(fig.number):
-        plt.ioff(); plt.close(fig)
+
 
 # --- Main Genetic Algorithm ---
 def solve_8_queens():
@@ -178,8 +190,7 @@ def solve_8_queens():
                 new_pop.append(mutate(c2))
         population = new_pop
 
-    # Final display of best solution
-    animate_placement(best_chromo, best_gen, best_score, max_score)
+    #Stop animation and show final placement
     plt.ioff(); plt.show()
     return best_chromo, best_score, best_gen
 
