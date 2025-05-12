@@ -62,7 +62,7 @@ conda env update -f environment.yml
 Run the solver:
 
 ```bash
-python main.py
+python EightQueensProblemSolver.py
 ```
 
 This will launch an animated Matplotlib window showing queens being placed generation by generation. The script terminates when it finds a solution or reaches the maximum number of generations.
