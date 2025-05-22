@@ -5,7 +5,7 @@ import numpy as np
 
 # --- Configuration & GA Parameters ---
 N = 8  # Board size (8×8)
-POPULATION_SIZE = 50  # Number of candidate solutions each generation
+POPULATION_SIZE = 10  # Number of candidate solutions each generation
 MAX_GENERATIONS = 500  # Maximum number of generations to evolve
 MUTATION_RATE = 0.2   # Probability of swapping two genes
 TOURNAMENT_SIZE = 5   # Number of individuals in each tournament for selection
