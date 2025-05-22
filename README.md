@@ -1,204 +1,102 @@
-# 8-Queens Solver with Genetic Algorithm
+# 8 Queens Problem Solved with Genetic Algorithms
 
-NNGA Project - Year III Sem II
+## Overview
+This is a summary of what I've tried and tested (in chronological order) in my journey towards solving the chess-related 8-queens problem
 
-## Table of Contents
+1. Permutation-Vector GA
+2. Matrix GA with Repair
+3. Matrix GA without Repair (Queen-Set Crossover)
+4. Possibility of Parallelization & N-Queens
 
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Usage](#usage)
-- [How It Works](#how-it-works)
-  - [Problem Representation](#problem-representation)
-  - [Chromosome Encoding](#chromosome-encoding)
-  - [Fitness Function](#fitness-function)
-  - [Genetic Operators](#genetic-operators)
-    - [Selection (Tournament)](#selection-tournament)
-    - [Crossover (Order Crossover OX1)](#crossover-order-crossover-ox1)
-    - [Mutation (Swap)](#mutation-swap)
-    - [Elitism](#elitism)
-  - [GA Loop](#ga-loop)
-- [Visualization](#visualization)
-  - [Interactive Mode](#interactive-mode)
-  - [Checkerboard Pattern](#checkerboard-pattern)
-  - [Axes, Ticks, and Grid](#axes-ticks-and-grid)
-  - [Placing Queens](#placing-queens)
-- [Configuration & Hyperparameters](#configuration--hyperparameters)
-- [Extending to N-Queens](#extending-to-n-queens)
+## Version 1: Permutation-Vector GA
+- *Encoding:* length-8 list, index=column, value=row  
+  ```
+  Example: [4, 1, 7, 5, 2, 0, 6, 3]  → automatically one queen per column and row
+  ```
 
----
+- *Fitness:* count non-attacking diagonal pairs  
+  ```python
+  fitness = C(8,2) – number of diagonal conflicts ; (max score = 28)
+  ```  
+  
 
-## Introduction
+- *Operators:*
+  - Order Crossover (OX1) to splice permutations, so basically I would keep the same columns of the queens but they'd have different rows
+  -  Swap-mutation: swap two elements (I would swap the columns of the queens and keep them on the same rows)
 
-The 8-Queens puzzle asks: can you place eight queens on an 8×8 chessboard so that none attack each other? This implementation uses a Genetic Algorithm—a population-based, evolutionary search—to find a valid placement.
 
-## Installation
+- *Note:* It uses "domain knowledge" to build an optimal genetic algorithm, by making an assumption that queens will never occupy the same columns or rows,
+and that they would only attack each other diagonally
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/mmswflow-upb/NNGA-Project.git
-   ```
-2. Install dependencies (I recommend a virtual environment):
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Version 2: Matrix GA + Repair
+- *Encoding:* 8×8 binary (0s or 1s) matrix with up to 8 ones  
+  (queens can collide in rows OR columns OR diagonals), there cannot be two queens on the same cell
+  
+- *Fitness:* penalize all clashes (row + column + diagonal), the idea is that only one of the penalties can be applied at a time,
+  two queens cannot occupy the same cell, so the maximum penalty per pair remains one.   
+  ```python
+    fitness = C(8,2) – (row_conflicts + col_conflicts + diag_conflicts) ; max ifitness is still 28
+  ```
+  
+- *Operators:*
+  - Conflict-guided crossover: copy “least-conflicting” columns from parents, this caused a problem that I will discuss below...
+  - Mutation: swap one 1 with one 0, by randomly selected a queen and an empty cell, and swapping the 1 and 0 in the old, respectively the new cell, thus introducing new configurations that crossovers could never achieve alone
+  - Repair: after crossover, randomly add missing ones so sum(matrix)=8, why did this happen? 
+    Because in crossovers, I compared the columns of each two parents, even empty columns... this resulted in some generations with less than 8 queens.
+   
 
-## Installing with Miniconda
+- *Note:* I didnt want an extra function for filling the boards with the right number of queens, also I didn't like the way I was copying whole columns instead of taking individual queens.
 
-If you have [Miniconda](https://docs.conda.io/en/latest/miniconda.html) installed, you can quickly create and activate the environment defined in `environment.yml`:
+## Version 3: Matrix GA without Repair
+- Encoding: same 8×8 binary matrix, but operators always preserve exactly 8 queens
 
-```bash
-conda env create -f environment.yml
-conda activate nnproject
-```
+- Queen-Set Crossover:
+  1. Extract parent1’s queen-coordinate set (8 pairs)
+  2. Randomly sample `k` of those into child
+  3. Fill remaining slots with non-duplicate queens from parent2
+  4. If still short (due to duplicates), randomly add until 8
 
-To apply changes later (after editing `environment.yml`), run:
+- Mutation: move one queen to a random empty cell (like in the previous implementation)
 
-```bash
-conda env update -f environment.yml
-```
+- Fitness: same full penalty of row + column + diagonal conflicts
 
-## Usage
+- *Note:* At this point I also (finally) decided to separate the plotting logic from the actual algorithm and put it in a plot_utils.py
 
-Run the solver:
+## Visualization (all versions)
 
-```bash
-python EightQueensProblemSolver.py
-```
+- Animates the best candidate each generation using Matplotlib  
+- Draws an 8×8 checkerboard, then places eight red ♛ one by one, left-to-right  
+- Title shows generation number and fitness score  
+- Only the 3rd version uses the module `plot_utils.py` for `init_plot(), animate(), finalize()`, but the other 2 display the chessboards in the same way
 
-This will launch an animated Matplotlib window showing queens being placed generation by generation. The script terminates when it finds a solution or reaches the maximum number of generations.
 
-## How It Works
+## Setup Instructions
 
-### Problem Representation
+1. Clone this repository.
+2. (Optional) Create Conda env:
 
-- **Search space size**: 8! = 40,320 possible ways to assign one unique row per column.  
-- **Goal**: maximize the number of non-attacking queen pairs (28) by eliminating diagonal conflicts.
+    ```python
+     conda env create -f environment.yml
+     conda activate nnproject
+    ```
 
-### Chromosome Encoding
+3. Or install via pip:
 
-Each individual (chromosome) is a list of length `N` (8) where:
+    ```python
+     pip install -r requirements.txt
+    ```
 
-```python
-chromosome = [r0, r1, ..., r7]
-# index = column, value = row of the queen in that column
-```
+4. Run the desired variant:
 
-By using a permutation of `0..N-1`, row- and column-conflicts are automatically avoided.
+    ```python
+     python EightQueensProblem_Ver1.py
+     python EightQueensProblem_Ver2.py
+     python EightQueensProblem_Ver3.py
+    ```
 
-### Fitness Function
+## Next Steps
 
-```python
-max_pairs = N*(N-1)//2  # total pairs = 28
-attacks = count of diagonal conflicts
-fitness = max_pairs - attacks
-```
-
-- Two queens conflict diagonally if `|i - j| == |row_i - row_j|`.  
-- Perfect solution ⇒ `attacks = 0`, `fitness = max_pairs`.
-
-### Genetic Operators
-
-#### Selection (Tournament)
-
-1. Randomly sample `k` individuals from the population.  
-2. Choose the one with the highest fitness as a parent.  
-
-This biases reproduction toward fitter individuals while preserving diversity.
-
-#### Crossover (Order Crossover OX1)
-
-1. Pick two cut-points `a < b`.  
-2. Child copies parent1’s slice `a..b` in positions `a..b`.  
-3. Fill remaining slots by listing genes from parent2 in order, skipping those already copied, wrapping around via modulo.
-
-Produces two valid permutation children.
-
-#### Mutation (Swap)
-
-- With probability `MUTATION_RATE`, pick two indices `i, j` at random and swap `chromosome[i]` ↔ `chromosome[j]`.  
-- Keeps the chromosome a permutation, injecting small variability.
-
-#### Elitism
-
-The best individual (champion) in each generation is copied unchanged into the next population, ensuring the best solution never degrades.
-
-### GA Loop
-
-1. **Initialize** population of size `POPULATION_SIZE` with random permutations.  
-2. **Evaluate** fitness of each individual.  
-3. **Record** and preserve the champion.  
-4. **If** champion’s fitness == `max_pairs`, **stop**.  
-5. **Build new population**:  
-   - Add champion by elitism.  
-   - While new population < `POPULATION_SIZE`:  
-     1. Select two parents via tournament.  
-     2. Crossover to get two children.  
-     3. Mutate each child.  
-     4. Append to new population.  
-6. **Repeat** up to `MAX_GENERATIONS`.
-
-## Visualization
-
-The solver shows an animated view of the best board each generation:
-
-### Interactive Mode
-
-- `plt.ion()` enables non-blocking updates.  
-- `fig.canvas.draw()` + `flush_events()` push each frame.  
-- `time.sleep(...)` controls the animation speed.
-
-### Checkerboard Pattern
-
-```python
-pattern = np.fromfunction(lambda i, j: (i + j) % 2, (N, N))
-ax.imshow(pattern, cmap='binary', interpolation='nearest')
-```
-
-- Creates an N×N array of 0s/1s for a classic chessboard.  
-- `interpolation='nearest'` ensures crisp, non-blurred squares.
-
-### Axes, Ticks, and Grid
-
-```python
-ax.set_xticks(np.arange(N))
-ax.set_yticks(np.arange(N))
-ax.set_xticklabels([])
-ax.set_yticklabels([])
-ax.grid(True, which='both', color='black')
-```
-
-- Places tick marks at each integer to align grid lines with square boundaries.  
-- Hides numeric labels for a clean look.  
-- Draws black grid lines at every row/column boundary.
-
-### Placing Queens
-
-```python
-for col in range(N):
-    row = chromosome[col]
-    ax.text(col, row, "\u265B", fontsize=24, ha='center', va='center', color='red')
-    fig.canvas.draw(); fig.canvas.flush_events(); time.sleep(dt)
-```
-
-- Draws the Unicode queen symbol (♛) at each board coordinate.  
-- Updates title with generation and fitness info.
-
-## Configuration & Hyperparameters
-
-Located at the top of `main.py`:
-
-- `N` (board size)  
-- `POPULATION_SIZE` (e.g., 6 or 50)  
-- `MAX_GENERATIONS` (e.g., 500)  
-- `MUTATION_RATE` (e.g., 0.1–0.2)  
-- `TOURNAMENT_SIZE` (e.g., 5)  
-- `VISUALIZATION_UPDATE_INTERVAL` (seconds between queen placements)
-
-Experiment by tuning these values for speed or success rate.
-
-## Extending to N-Queens
-
-Simply change `N = 8` to another integer (e.g., 10). The code adapts:  
-- Chromosome length → `N`  
-- Fitness max → `N*(N-1)//2`  
-- Board drawing → `N×N`
+- Tune POP_SIZE, TOUR_SIZE, MUT_RATE for exploration vs exploitation
+- Add a small hill-climber after mutation for last-mile fixes
+- Try an island model or parallelize fitness evaluation for larger N
+- Extend to the N-Queens general case (N > 8)
