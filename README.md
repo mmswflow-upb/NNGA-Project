@@ -114,7 +114,23 @@ and that they would only attack each other diagonally
 
 ## Next Steps
 
-- Tune POP_SIZE, TOUR_SIZE, MUT_RATE for exploration vs exploitation
-- Add a small hill-climber after mutation for last-mile fixes
-- Try an island model or parallelize fitness evaluation for larger N
-- Extend to the N-Queens general case (N > 8)
+- **Implement an Island Model**  
+  - Partition the population into multiple sub-populations (“islands”), each evolving independently with its own crossover/mutation parameters.  
+  - Periodically migrate top individuals between islands to maintain diversity and avoid premature convergence.
+
+- **Parallelize Fitness Evaluation**  
+  - Distribute the costly conflict-counting step across multiple CPU cores or worker processes.  
+  - Use Python’s multiprocessing or a parallel computing library (e.g., Dask, Ray) to evaluate large populations in parallel, reducing generation time.
+
+- **Leverage GPU for Large-Scale N-Queens**  
+  - Port fitness and mutation operators to run on the GPU via CUDA or OpenCL (e.g., with Numba or PyTorch), especially for N≫8.  
+  - Batch-process many candidate boards simultaneously to exploit SIMD parallelism.
+
+- **Dynamic Migration Strategies**  
+  - Experiment with migration frequency and size: synchronous vs. asynchronous migration, fixed vs. adaptive intervals.  
+  - Monitor island diversity and trigger migrations when stagnation is detected.
+
+- **Scale to General N-Queens (N > 8)**  
+  - Benchmark performance growth as N increases; adjust GA parameters (population size, mutation rate) for larger problem sizes.  
+  - Incorporate problem-specific heuristics (e.g., hill-climbing local search interleaved with GA) to handle the exponentially growing search space.
+
