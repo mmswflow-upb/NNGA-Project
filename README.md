@@ -1,7 +1,22 @@
 # 8 Queens Problem Solved with Genetic Algorithms
 
+## Table of Contents
+
+1. [Overview](#overview)  
+2. [Implementation](#implementation)  
+   2.1 [Version 1: Permutation-Vector GA](#version-1-permutation-vector-ga)  
+   2.2 [Version 2: Matrix GA + Repair](#version-2-matrix-ga--repair)  
+   2.3 [Version 3: Matrix GA without Repair (Queen-Set Crossover)](#version-3-matrix-ga-without-repair)  
+3. [Testing and Results](#testing-and-results)  
+4. [Visualization](#visualization)  
+5. [Setup Instructions](#setup-instructions)  
+6. [Next Steps](#next-steps)  
+
 ## Overview
-This is a summary of what I've tried and tested (in chronological order) in my journey towards solving the chess-related 8-queens problem
+
+This is a summary of what I've tried and tested (in chronological order) in my journey towards solving the chess-related 8-queens problem.
+
+## Implementation
 
 1. Permutation-Vector GA
 2. Matrix GA with Repair
@@ -62,7 +77,9 @@ and that they would only attack each other diagonally
 
 - *Note:* At this point I also (finally) decided to separate the plotting logic from the actual algorithm and put it in a plot_utils.py
 
-## Visualization (all versions)
+## Testing and Results
+
+## Visualization
 
 - Animates the best candidate each generation using Matplotlib  
 - Draws an 8×8 checkerboard, then places eight red ♛ one by one, left-to-right  
@@ -73,18 +90,19 @@ and that they would only attack each other diagonally
 ## Setup Instructions
 
 1. Clone this repository.
-2. (Optional) Create Conda env:
+2. Dependencies  
 
-    ```python
-     conda env create -f environment.yml
-     conda activate nnproject
-    ```
+   2.1. (Optional) Create Conda env:  
+       ```bash
+         conda env create -f environment.yml
+         conda activate nnproject
+       ```
+   
+   2.2. Or install via pip:  
+       ```bash
+         pip install -r requirements.txt
+       ```
 
-3. Or install via pip:
-
-    ```python
-     pip install -r requirements.txt
-    ```
 
 4. Run the desired variant:
 
