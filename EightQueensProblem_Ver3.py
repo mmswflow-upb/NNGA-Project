@@ -138,5 +138,5 @@ def solve_8_queens_matrix():
     if animate(best, best_gen, best_fit, max_fit):
         finalize()
 
-if __name__ == "__main__":
-    solve_8_queens_matrix()
+solve_8_queens_matrix()
+    

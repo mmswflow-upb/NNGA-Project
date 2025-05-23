@@ -194,9 +194,8 @@ def solve_8_queens():
     plt.ioff(); plt.show()
     return best_chromo, best_score, best_gen
 
-# --- Execution Entry Point ---
-if __name__ == '__main__':
-    print("Starting 8-Queens GA with interactive evolution visualization...")
-    solve_8_queens()
-    print("Done.")
+
+   
+solve_8_queens()
+    
 

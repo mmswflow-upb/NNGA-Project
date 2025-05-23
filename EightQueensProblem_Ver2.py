@@ -199,6 +199,4 @@ def solve_8_queens_matrix():
     plt.show()
     return best, best_score, best_gen
 
-if __name__ == '__main__':
-    print("Starting GA 8-Queens with conflict-guided crossover...")
-    solve_8_queens_matrix()
+solve_8_queens_matrix()
