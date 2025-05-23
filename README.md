@@ -81,8 +81,8 @@ and that they would only attack each other diagonally
 
 - *Fitness:* same full penalty of row + column + diagonal conflicts
 
-- *Note:* I came across the hill climb approach, it looked like it was the solution to my problem, which was generations getting stuck all the time at fitness `27`.
-  At this point, I also (finally) decided to separate the plotting logic from the actual algorithm and put it in a `plot_utils.py`
+- *Note:* I came across the hill climb approach, it looked like it was the solution to my problem, which was that generations getting stuck all the time at fitness `27`.
+  By this point, I had also (finally) decided to separate the plotting logic from the actual algorithm and put it in a `plot_utils.py`
 
 
 ## Testing and Results
