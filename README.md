@@ -6,7 +6,7 @@
 2. [Implementation](#implementation)  
    2.1 [Version 1: Permutation-Vector GA](#version-1-permutation-vector-ga)  
    2.2 [Version 2: Matrix GA + Repair](#version-2-matrix-ga--repair)  
-   2.3 [Version 3: Matrix GA without Repair (Queen-Set Crossover)](#version-3-matrix-ga-without-repair)  
+   2.3 [Version 3: Matrix GA with Hill Climbing](#version-3-matrix-ga-with-hill-climbing)  
 3. [Testing and Results](#testing-and-results)  
 4. [Visualization](#visualization)  
 5. [Setup Instructions](#setup-instructions)  
@@ -55,29 +55,49 @@ and that they would only attack each other diagonally
   
 - *Operators:*
   - Conflict-guided crossover: copy “least-conflicting” columns from parents, this caused a problem that I will discuss below...
-  - Mutation: swap one 1 with one 0, by randomly selected a queen and an empty cell, and swapping the 1 and 0 in the old, respectively the new cell, thus introducing new configurations that crossovers could never achieve alone
+  - Mutation: swap one 1 with one 0, by randomly selecting a queen and an empty cell, and swapping the 1 and 0 in the old, respectively the new cell, thus introducing new configurations that crossovers could never achieve alone
   - Repair: after crossover, randomly add missing ones so sum(matrix)=8, why did this happen? 
     Because in crossovers, I compared the columns of each two parents, even empty columns... this resulted in some generations with less than 8 queens.
    
 
-- *Note:* I didnt want an extra function for filling the boards with the right number of queens, also I didn't like the way I was copying whole columns instead of taking individual queens.
+- *Note:* I didnt want an extra function for filling the boards with the right number of queens, also I didn't like the way I was copying whole columns instead of taking individual queens. I also didnt like how it found solutions really slow with populations of ~200 members **minimum**, it lacked so much in performance that I had to just drop it and try something different..
 
-## Version 3: Matrix GA without Repair
-- Encoding: same 8×8 binary matrix, but operators always preserve exactly 8 queens
+## Version 3: Matrix GA with Hill Climbing
+- *Encoding:* same 8×8 binary matrix, but operators always preserve exactly 8 queens
 
-- Queen-Set Crossover:
-  1. Extract parent1’s queen-coordinate set (8 pairs)
+- *Queen-Set Crossover:*
+  1. Extract `parent1’s` queen-coordinate set (8 pairs)
   2. Randomly sample `k` of those into child
-  3. Fill remaining slots with non-duplicate queens from parent2
+  3. Fill remaining slots with non-duplicate queens from `parent2`
   4. If still short (due to duplicates), randomly add until 8
 
-- Mutation: move one queen to a random empty cell (like in the previous implementation)
+- *Mutation + Local Hill Climb:*
+  1. **Mutation:** move one queen to a random empty cell (probability = MUT_RATE).  
+  2. **Hill Climbing Step:**  
+     - Identify the queen currently involved in the most conflicts (row, column, or diagonal).  
+     - For that queen, try moving it to each other empty cell on the board and compute the resulting fitness.  
+     - If any move improves the fitness, accept the single best move; otherwise, keep the original position.  
+     - (Perform just one such local move per offspring to limit overhead.)
 
-- Fitness: same full penalty of row + column + diagonal conflicts
+- *Fitness:* same full penalty of row + column + diagonal conflicts
 
-- *Note:* At this point I also (finally) decided to separate the plotting logic from the actual algorithm and put it in a plot_utils.py
+- *Note:* I came across the hill climb approach, it looked like it was the solution to my problem, which was children getting stuck all the time in the second implemenation,
+  never going over the score of 27. At this point, I also (finally) decided to separate the plotting logic from the actual algorithm and put it in a `plot_utils.py`
+
 
 ## Testing and Results
+
+- For the first implementation, I always got results quickly, in a couple of generatios, due to the fact that the search space was significantly smaller `(8!)`
+
+- For the second one, due to the much bigger search space `(~100k times bigger)`, even with big populations `(200)` and a very high mutation rate of `0.8` and a tournament size of `20`, this was the
+  minimum I needed to guarantee that I would get a solution (although there were some bad cases which didnt get solved in less than 500 generations).
+  Anything below those numbers was prone to get stuck at fitness 27 with no end in sight..
+
+- In the 3rd solution, I've actually tested it without hill climbing at first, it worked just as slow as the previous one, but with more readable code and the solution made more sense in a way.
+  
+  Then I found out about hill climbing, and I integrated it into my 3rd version only. It was a major improvement over anything I had done previously, the fact is that it helped a lot with "unstucking" the populations from
+  local optima at fitness `27`, with really small populations `~10`, mutation rate of `0.2` & tournament size of `2`, I achieved solutions in less than `20` generations in most cases. In the worst cases it would take longer
+  `(300 generations)`, but it was still able to find a solution mostly in all cases in less than `500` generations, with much smaller populations & mutation rates, which was a huge improvement over anything from before.
 
 ## Visualization
 
@@ -124,7 +144,7 @@ and that they would only attack each other diagonally
 
 - **Leverage GPU for Large-Scale N-Queens**  
   - Port fitness and mutation operators to run on the GPU via CUDA or OpenCL (e.g., with Numba or PyTorch), especially for N≫8.  
-  - Batch-process many candidate boards simultaneously to exploit SIMD parallelism.
+  - Batch-process many candidate boards simultaneously to exploit SIMD parallelism. Useful for bigger problems (N > 8).
 
 - **Dynamic Migration Strategies**  
   - Experiment with migration frequency and size: synchronous vs. asynchronous migration, fixed vs. adaptive intervals.  
@@ -132,5 +152,4 @@ and that they would only attack each other diagonally
 
 - **Scale to General N-Queens (N > 8)**  
   - Benchmark performance growth as N increases; adjust GA parameters (population size, mutation rate) for larger problem sizes.  
-  - Incorporate problem-specific heuristics (e.g., hill-climbing local search interleaved with GA) to handle the exponentially growing search space.
 
