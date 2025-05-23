@@ -31,7 +31,7 @@ This is a summary of what I've tried and tested (in chronological order) in my j
 
 - *Fitness:* count non-attacking diagonal pairs  
   ```python
-  fitness = C(8,2) – number of diagonal conflicts ; (max score = 28)
+  fitness = C(8,2) – number of diagonal conflicts ; (max fitness = 28)
   ```  
   
 
