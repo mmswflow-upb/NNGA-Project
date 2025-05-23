@@ -95,9 +95,8 @@ and that they would only attack each other diagonally
 
 - In the 3rd solution, I've actually tested it without hill climbing at first, it worked just as slow as the previous one, but with more readable code and the solution made more sense in a way.
   
-  Then I found out about hill climbing, and I integrated it into my 3rd version only. It was a major improvement over anything I had done previously, the fact is that it helped a lot with "unstucking" the populations from
-  local optima at fitness `27`, with really small populations `~10`, mutation rate of `0.2` & tournament size of `2`, I achieved solutions in less than `20` generations in most cases. In the worst cases it would take longer
-  `(300 generations)`, but it was still able to find a solution mostly in all cases in less than `500` generations, with much smaller populations & mutation rates, which was a huge improvement over anything from before.
+  Then I found out about hill climbing from the internet, and I implemented it into my 3rd version only. It was a major improvement over anything I had done previously, the fact is that it helped a lot with "unstucking" the populations from
+  local optima at fitness `27`. With really small populations `~10`, mutation rate of `0.2` & tournament size of `2`, I was finding solutions in less than `20` generations in most cases. In the worst cases it would take longer than `(300 generations)`, but it was still able to find a solution mostly in all cases in less than `500` generations, with much smaller populations & mutation rates, which was a huge improvement over anything from before.
 
 ## Visualization
 
