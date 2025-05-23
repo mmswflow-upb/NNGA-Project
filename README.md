@@ -50,7 +50,7 @@ and that they would only attack each other diagonally
 - *Fitness:* penalize all clashes (row + column + diagonal), the idea is that only one of the penalties can be applied at a time,
   two queens cannot occupy the same cell, so the maximum penalty per pair remains one.   
   ```python
-    fitness = C(8,2) – (row_conflicts + col_conflicts + diag_conflicts) ; max ifitness is still 28
+    fitness = C(8,2) – (row_conflicts + col_conflicts + diag_conflicts) ; max fitness is still 28
   ```
   
 - *Operators:*
